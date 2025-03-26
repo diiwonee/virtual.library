@@ -6,8 +6,8 @@
     <title>Virtual Library</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f7f8fa;
+            font-family: 'Arial', sans-serif;
+            background-color: #E6E6FA; /* Light lavender */
             margin: 0;
             padding: 0;
             color: #333;
@@ -16,21 +16,29 @@
             max-width: 900px;
             margin: 0 auto;
             padding: 20px;
+            position: relative;
         }
         h1 {
             text-align: center;
             color: #4a90e2;
+            font-size: 36px;
+            margin-bottom: 20px;
         }
         .search-container {
             display: flex;
             flex-direction: column;
             gap: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         .search-container input, .search-container select, .search-container button {
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 16px;
+            margin: 5px 0;
         }
         .search-container button {
             background-color: #4a90e2;
@@ -46,15 +54,10 @@
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: none;
         }
         .book-info p {
             font-size: 18px;
-        }
-        .genre-suggestions, .date-suggestions {
-            width: 200px;
-        }
-        .input-label {
-            font-weight: bold;
         }
         .drag-area {
             width: 100%;
@@ -66,9 +69,28 @@
             color: #4a90e2;
             border-radius: 10px;
             margin-top: 30px;
+            background-image: url('https://i.imgur.com/oGz0z9h.jpg');
+            background-size: cover;
+            background-position: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
         .drag-area.hover {
-            background-color: rgba(74, 144, 226, 0.1);
+            background-color: rgba(74, 144, 226, 0.2);
+        }
+        .drag-area p {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .input-label {
+            font-weight: bold;
+        }
+        .genre-suggestions, .date-suggestions {
+            width: 200px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #888;
         }
     </style>
 </head>
@@ -119,6 +141,10 @@
         </div>
 
         <div class="book-info" id="bookInfo"></div>
+    </div>
+
+    <div class="footer">
+        <p>Powered by your Virtual Library</p>
     </div>
 
     <script>
@@ -203,6 +229,7 @@
         // Display book information
         function displayBookInfo(book) {
             if (book) {
+                document.getElementById('bookInfo').style.display = 'block';
                 document.getElementById('bookInfo').innerHTML = `
                     <h2>Book Information</h2>
                     <p><strong>Book ID:</strong> ${book.bookID}</p>

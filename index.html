@@ -100,6 +100,23 @@
             <h3>Book Details:</h3>
             <p id="bookDetails"></p>
         </div>
+
+        <!-- Filter Options -->
+        <div id="filterOptions" class="search-container" style="display: none;">
+            <input type="text" id="bookID" placeholder="Enter Book ID (ISBN)" />
+            <input type="text" id="author" placeholder="Enter Author Name" />
+            <select id="genreSelect">
+                <option value="">Select Genre</option>
+            </select>
+            <input type="number" id="publicationDate" placeholder="Enter Publication Date" />
+            <select id="availableSelect">
+                <option value="">Available</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+            <input type="date" id="lastCheckoutDate" />
+            <button onclick="applyFilters()">Apply Filters</button>
+        </div>
     </div>
 
     <footer>
@@ -117,13 +134,29 @@
             reader.onload = function(e) {
                 const contents = e.target.result;
                 const lines = contents.split("\n");
-                booksData = lines.map(line => {
+                booksData = lines.slice(1).map(line => {
                     const [ISBN, title, author, genre, publicationDate, available, lastCheckoutDate] = line.split(",");
                     return { ISBN, title, author, genre, publicationDate, available, lastCheckoutDate };
                 });
+
+                // Populate the genres in the filter dropdown
+                populateGenres();
+                document.getElementById('filterOptions').style.display = "block";
                 alert("CSV file uploaded successfully!");
             };
             reader.readAsText(file);
+        }
+
+        // Function to populate genres in the filter options
+        function populateGenres() {
+            const genres = new Set(booksData.map(book => book.genre));
+            const genreSelect = document.getElementById("genreSelect");
+            genres.forEach(genre => {
+                const option = document.createElement("option");
+                option.value = genre;
+                option.textContent = genre;
+                genreSelect.appendChild(option);
+            });
         }
 
         // Function to search by title
@@ -145,6 +178,47 @@
                 resultContainer.style.display = "block";
             } else {
                 alert("Book not found.");
+            }
+        }
+
+        // Function to apply filters
+        function applyFilters() {
+            const bookID = document.getElementById("bookID").value;
+            const author = document.getElementById("author").value.toLowerCase();
+            const genre = document.getElementById("genreSelect").value;
+            const publicationDate = document.getElementById("publicationDate").value;
+            const available = document.getElementById("availableSelect").value;
+            const lastCheckoutDate = document.getElementById("lastCheckoutDate").value;
+
+            const filteredBooks = booksData.filter(book => {
+                return (
+                    (bookID === "" || book.ISBN.includes(bookID)) &&
+                    (author === "" || book.author.toLowerCase().includes(author)) &&
+                    (genre === "" || book.genre === genre) &&
+                    (publicationDate === "" || book.publicationDate === publicationDate) &&
+                    (available === "" || book.available === available) &&
+                    (lastCheckoutDate === "" || book.lastCheckoutDate === lastCheckoutDate)
+                );
+            });
+
+            if (filteredBooks.length > 0) {
+                const resultContainer = document.getElementById("resultContainer");
+                const bookDetails = document.getElementById("bookDetails");
+                bookDetails.innerHTML = `<h3>Filtered Books:</h3>`;
+                filteredBooks.forEach(book => {
+                    bookDetails.innerHTML += `
+                        <div><strong>Title:</strong> ${book.title}</div>
+                        <div><strong>Author:</strong> ${book.author}</div>
+                        <div><strong>Genre:</strong> ${book.genre}</div>
+                        <div><strong>Publication Date:</strong> ${book.publicationDate}</div>
+                        <div><strong>Available:</strong> ${book.available}</div>
+                        <div><strong>Last Checkout Date:</strong> ${book.lastCheckoutDate}</div>
+                        <hr>
+                    `;
+                });
+                resultContainer.style.display = "block";
+            } else {
+                alert("No books found with these filters.");
             }
         }
     </script>

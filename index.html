@@ -64,6 +64,17 @@
         .file-input-container input[type="file"] {
             display: none;
         }
+        .file-input-container button {
+            background-color: #B497BD;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .file-input-container button:hover {
+            background-color: #9e80a0;
+        }
         .file-input-container span {
             font-size: 16px;
             color: #B497BD;
@@ -75,6 +86,10 @@
             color: white;
             margin-top: 20px;
             border-radius: 5px;
+        }
+        .book-info {
+            font-size: 18px; /* Larger text for book info */
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -91,6 +106,7 @@
             <div class="file-input-container">
                 <label for="csvFile">Upload CSV File:</label>
                 <input type="file" id="csvFile" accept=".csv" onchange="handleFile(event)" />
+                <button onclick="document.getElementById('csvFile').click();">Upload</button>
                 <span>Click to select a CSV file</span>
             </div>
         </div>
@@ -98,7 +114,7 @@
         <!-- Search result or book info will be displayed here -->
         <div id="resultContainer" class="search-container" style="display: none;">
             <h3>Book Details:</h3>
-            <p id="bookDetails"></p>
+            <p id="bookDetails" class="book-info"></p>
         </div>
 
         <!-- Filter Options -->
@@ -115,7 +131,7 @@
                 <option value="No">No</option>
             </select>
             <input type="date" id="lastCheckoutDate" />
-            <button onclick="applyFilters()">Apply Filters</button>
+            <button onclick="applyFilters()">Find</button>
         </div>
     </div>
 
@@ -125,6 +141,7 @@
 
     <script>
         let booksData = [];
+        let genres = [];
 
         // Function to handle file upload
         function handleFile(event) {
@@ -139,7 +156,7 @@
                     return { ISBN, title, author, genre, publicationDate, available, lastCheckoutDate };
                 });
 
-                // Populate the genres in the filter dropdown
+                // Populate the genres in the filter dropdown excluding "Daniel Kahneman" and "and Tomorrow"
                 populateGenres();
                 document.getElementById('filterOptions').style.display = "block";
                 alert("CSV file uploaded successfully!");
@@ -147,9 +164,10 @@
             reader.readAsText(file);
         }
 
-        // Function to populate genres in the filter options
+        // Function to populate genres in the filter options, excluding specific genres
         function populateGenres() {
-            const genres = new Set(booksData.map(book => book.genre));
+            genres = [...new Set(booksData.map(book => book.genre))];
+            genres = genres.filter(genre => genre !== "Daniel Kahneman" && genre !== "and Tomorrow");
             const genreSelect = document.getElementById("genreSelect");
             genres.forEach(genre => {
                 const option = document.createElement("option");

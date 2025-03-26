@@ -7,10 +7,10 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #E6E6FA; /* Light lavender */
+            background-color: #E6E6FA; /* Light lavender background */
             margin: 0;
             padding: 0;
-            color: #333;
+            color: #B497BD; /* Lavender text */
         }
         .container {
             max-width: 900px;
@@ -20,7 +20,7 @@
         }
         h1 {
             text-align: center;
-            color: #4a90e2;
+            color: #B497BD; /* Lavender text */
             font-size: 36px;
             margin-bottom: 20px;
         }
@@ -38,211 +38,115 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 16px;
-            margin: 5px 0;
         }
         .search-container button {
-            background-color: #4a90e2;
+            background-color: #B497BD; /* Lavender button color */
             color: white;
             cursor: pointer;
         }
         .search-container button:hover {
-            background-color: #357ab7;
+            background-color: #9e80a0; /* Slightly darker lavender */
         }
-        .book-info {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: none;
-        }
-        .book-info p {
-            font-size: 18px;
-        }
-        .drag-area {
-            width: 100%;
-            height: 150px;
-            border: 2px dashed #4a90e2;
+        .file-input-container {
             display: flex;
             justify-content: center;
-            align-items: center;
-            color: #4a90e2;
-            border-radius: 10px;
-            margin-top: 30px;
-            background-image: url('https://i.imgur.com/oGz0z9h.jpg');
-            background-size: cover;
-            background-position: center;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        .drag-area.hover {
-            background-color: rgba(74, 144, 226, 0.2);
-        }
-        .drag-area p {
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .input-label {
-            font-weight: bold;
-        }
-        .genre-suggestions, .date-suggestions {
-            width: 200px;
-        }
-        .footer {
+            gap: 20px;
+            padding: 20px;
+            border: 2px dashed #B497BD;
+            border-radius: 8px;
             text-align: center;
-            margin-top: 40px;
-            color: #888;
+        }
+        .file-input-container label {
+            font-size: 18px;
+            color: #B497BD;
+            cursor: pointer;
+        }
+        .file-input-container input[type="file"] {
+            display: none;
+        }
+        .file-input-container span {
+            font-size: 16px;
+            color: #B497BD;
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #B497BD;
+            color: white;
+            margin-top: 20px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <h1>Virtual Library</h1>
+        <h1>Welcome to the Virtual Library</h1>
         
-        <!-- Drag and Drop Area for CSV -->
-        <div id="dragArea" class="drag-area" ondrop="handleDrop(event)" ondragover="allowDrop(event)">
-            <p>Drag and drop your CSV file here</p>
-        </div>
-
+        <!-- Search and CSV Upload Section -->
         <div class="search-container">
-            <!-- Search by Title -->
-            <input type="text" id="searchTitle" placeholder="Enter book title..." />
+            <input type="text" id="bookTitle" placeholder="Enter book title" />
             <button onclick="searchByTitle()">Search by Title</button>
-
-            <!-- Search by Other Parameters -->
-            <input type="text" id="bookID" placeholder="Enter Book ID" />
-            <input type="text" id="author" placeholder="Enter Author's name" />
             
-            <select id="genre" class="genre-suggestions">
-                <option value="">Select Genre</option>
-                <option value="Classics">Classics</option>
-                <option value="Children’s Books">Children’s Books</option>
-                <option value="Young Adult / Fantasy">Young Adult / Fantasy</option>
-                <option value="Mystery / Thriller">Mystery / Thriller</option>
-                <option value="Science Fiction">Science Fiction</option>
-                <option value="Non-Fiction">Non-Fiction</option>
-                <option value="Philosophy / Self-Help">Philosophy / Self-Help</option>
-                <option value="Romance">Romance</option>
-                <option value="World Literature / Translated Works">World Literature / Translated Works</option>
-                <option value="Modern & Popular Fiction">Modern & Popular Fiction</option>
-            </select>
-            
-            <input type="text" id="publicationDate" placeholder="Enter Publication Date" class="date-suggestions" />
-            
-            <select id="available">
-                <option value="">Available</option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-            </select>
-            
-            <input type="date" id="lastCheckoutDate" placeholder="Enter Last Checkout Date" />
-
-            <button onclick="searchByFilters()">Search by Filters</button>
+            <!-- File upload -->
+            <div class="file-input-container">
+                <label for="csvFile">Upload CSV File:</label>
+                <input type="file" id="csvFile" accept=".csv" onchange="handleFile(event)" />
+                <span>Click to select a CSV file</span>
+            </div>
         </div>
 
-        <div class="book-info" id="bookInfo"></div>
+        <!-- Search result or book info will be displayed here -->
+        <div id="resultContainer" class="search-container" style="display: none;">
+            <h3>Book Details:</h3>
+            <p id="bookDetails"></p>
+        </div>
     </div>
 
-    <div class="footer">
-        <p>Powered by your Virtual Library</p>
-    </div>
+    <footer>
+        <p>&copy; 2025 Virtual Library</p>
+    </footer>
 
     <script>
-        let books = [];
+        let booksData = [];
 
-        // Handle the drop event to read CSV
-        function handleDrop(event) {
-            event.preventDefault();
-            const file = event.dataTransfer.files[0];
-            if (file && file.name.endsWith('.csv')) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const csvData = event.target.result;
-                    parseCSV(csvData);
-                };
-                reader.readAsText(file);
-            } else {
-                alert('Please drop a valid CSV file.');
-            }
+        // Function to handle file upload
+        function handleFile(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const contents = e.target.result;
+                const lines = contents.split("\n");
+                booksData = lines.map(line => {
+                    const [ISBN, title, author, genre, publicationDate, available, lastCheckoutDate] = line.split(",");
+                    return { ISBN, title, author, genre, publicationDate, available, lastCheckoutDate };
+                });
+                alert("CSV file uploaded successfully!");
+            };
+            reader.readAsText(file);
         }
 
-        // Allow the drag event
-        function allowDrop(event) {
-            event.preventDefault();
-            const dragArea = document.getElementById('dragArea');
-            dragArea.classList.add('hover');
-        }
-
-        // Remove hover effect when drag leaves the drop area
-        document.getElementById('dragArea').addEventListener('dragleave', () => {
-            document.getElementById('dragArea').classList.remove('hover');
-        });
-
-        // Parse the CSV file
-        function parseCSV(csvData) {
-            const rows = csvData.split('\n').map(row => row.split(','));
-            rows.shift();  // Remove the header row
-            books = rows.map(row => ({
-                bookID: row[0].trim(),
-                title: row[1].trim(),
-                author: row[2].trim(),
-                genre: row[3].trim(),
-                publicationDate: row[4].trim(),
-                available: row[5].trim(),
-                lastCheckoutDate: row[6].trim(),
-            }));
-            alert('CSV file loaded successfully!');
-        }
-
-        // Search for book by title
+        // Function to search by title
         function searchByTitle() {
-            const title = document.getElementById('searchTitle').value.toLowerCase();
-            const book = books.find(book => book.title.toLowerCase() === title);
-            displayBookInfo(book);
-        }
+            const title = document.getElementById("bookTitle").value.toLowerCase();
+            const book = booksData.find(b => b.title.toLowerCase() === title);
 
-        // Search for books by filters
-        function searchByFilters() {
-            const bookID = document.getElementById('bookID').value;
-            const author = document.getElementById('author').value.toLowerCase();
-            const genre = document.getElementById('genre').value;
-            const publicationDate = document.getElementById('publicationDate').value;
-            const available = document.getElementById('available').value;
-            const lastCheckoutDate = document.getElementById('lastCheckoutDate').value;
-
-            const filteredBooks = books.filter(book => 
-                (bookID === '' || book.bookID.includes(bookID)) &&
-                (author === '' || book.author.toLowerCase().includes(author)) &&
-                (genre === '' || book.genre === genre) &&
-                (publicationDate === '' || book.publicationDate == publicationDate) &&
-                (available === '' || book.available === available) &&
-                (lastCheckoutDate === '' || book.lastCheckoutDate === lastCheckoutDate)
-            );
-
-            if (filteredBooks.length === 0) {
-                document.getElementById('bookInfo').innerHTML = '<p>No books found with the given filters.</p>';
-            } else {
-                displayBookInfo(filteredBooks[0]);
-            }
-        }
-
-        // Display book information
-        function displayBookInfo(book) {
             if (book) {
-                document.getElementById('bookInfo').style.display = 'block';
-                document.getElementById('bookInfo').innerHTML = `
-                    <h2>Book Information</h2>
-                    <p><strong>Book ID:</strong> ${book.bookID}</p>
-                    <p><strong>Title:</strong> ${book.title}</p>
-                    <p><strong>Author:</strong> ${book.author}</p>
-                    <p><strong>Genre:</strong> ${book.genre}</p>
-                    <p><strong>Publication Date:</strong> ${book.publicationDate}</p>
-                    <p><strong>Available:</strong> ${book.available}</p>
-                    <p><strong>Last Checkout Date:</strong> ${book.lastCheckoutDate}</p>
+                const resultContainer = document.getElementById("resultContainer");
+                const bookDetails = document.getElementById("bookDetails");
+                bookDetails.innerHTML = `
+                    <strong>Title:</strong> ${book.title}<br>
+                    <strong>Author:</strong> ${book.author}<br>
+                    <strong>Genre:</strong> ${book.genre}<br>
+                    <strong>Publication Date:</strong> ${book.publicationDate}<br>
+                    <strong>Available:</strong> ${book.available}<br>
+                    <strong>Last Checkout Date:</strong> ${book.lastCheckoutDate}
                 `;
+                resultContainer.style.display = "block";
+            } else {
+                alert("Book not found.");
             }
         }
     </script>
-
 </body>
 </html>
